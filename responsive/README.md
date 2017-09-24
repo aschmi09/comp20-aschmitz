@@ -1,0 +1,1 @@
+To the best of my knowledge, all aspects of the assignment have been implemented correctly. I collaborated on this assignment with a TA, Kenneth Slaby. I spent approximately 4 hours completing the assignment. 
