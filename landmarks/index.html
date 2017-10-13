@@ -115,17 +115,25 @@
           var personlng = theText.people[i].lng;
           var location = new google.maps.LatLng(personlat, personlng);
           var marker = new google.maps.Marker({
+            content: theText.people[i].login,
             position: location,
             icon: "person.jpg",
             map: map,
           });
+          var infoWindow = new google.maps.InfoWindow({
+          });
+
+           google.maps.event.addListener(marker, 'click', function () {
+            infoWindow.setContent(this.content)
+            infoWindow.open(map, this);
+            });
+
         }
         else {
           i++;
-        }
-      }
-    }
-
+        } 
+      } 
+    } 
 
 
 
