@@ -58,12 +58,26 @@
         var myLocation = new google.maps.LatLng(myLat, myLng);
         map.panTo(myLocation);
 
-        var marker = new google.maps.Marker({                   
+        var marker = new google.maps.Marker({ 
+            content: "You found me! (Login: WYHE4aQe) Nearest Landmark: ",    //call function "findnearest" here
             position: myLocation,
             icon: "me.jpg",                                           
             map: map,
         });
+
+        var infoWindow = new google.maps.InfoWindow({
+        });
+
+        google.maps.event.addListener(marker, 'click', function () {
+            infoWindow.setContent(this.content)
+            infoWindow.open(map, this);
+        });
+
       }
+
+      //function findnearest(){
+       // var distances = 
+      //}
 
       function sendRequest(){
          var http = new XMLHttpRequest();
@@ -85,10 +99,15 @@
     function landmarkMarker(theText){
         othertext = JSON.parse(theText);
         console.log(othertext);
+        distances = {};
+        
        for (i = 0; i < othertext.landmarks.length; i++){
           var landlng = othertext.landmarks[i].geometry.coordinates[0];
           var landlat = othertext.landmarks[i].geometry.coordinates[1];
           var location = new google.maps.LatLng(landlat, landlng);
+          distances[i] = [othertext.landmarks[i].properties.Location_Name, calculatedistance(landlat, landlng)]
+          console.log(distances[i][0], " ", distances[i][1]);
+
           var marker = new google.maps.Marker({
             content: othertext.landmarks[i].properties.Details,
             position: location,
@@ -104,7 +123,7 @@
             infoWindow.open(map, this);
         });
     }
-   
+    
     personmarker(othertext)
     }
 
