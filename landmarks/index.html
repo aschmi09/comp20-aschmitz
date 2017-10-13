@@ -20,19 +20,17 @@
       var map;
       function initMap() {
         map = new google.maps.Map(document.getElementById("map"), {
-          center: {lat: -34.397, lng: 150.644},
+          center: {lat: 42.4075, lng: 71.1190},
           zoom: 14,
         });
         getMyLocation();
       }
       myLat = 0;
       myLng = 0;
+
       function getMyLocation(){
-        console.log("Hit me One");
         if (navigator.geolocation){
-            console.log("Hit Me Two");
             navigator.geolocation.getCurrentPosition(function(position){
-              console.log("Hit Me Three");
               myLat = position.coords.latitude;
               myLng = position.coords.longitude;
               elem = document.getElementById("info");
@@ -40,8 +38,6 @@
               panTo();
               sendRequest();
             });
-              
-            console.log("Hit Me Four");
         }
         else {
           alert("Geolocation not supported");
@@ -91,16 +87,17 @@
         distances = {};
         var closestdist = 1;
         var closestname = "hello";
+        var p = 0;
         
        for (i = 0; i < othertext.landmarks.length; i++){
           var landlng = othertext.landmarks[i].geometry.coordinates[0];
           var landlat = othertext.landmarks[i].geometry.coordinates[1];
           var location = new google.maps.LatLng(landlat, landlng);
           distances[i] = [othertext.landmarks[i].properties.Location_Name, calculatedistance(landlat, landlng)]
-         // console.log(distances[i][0], " ", distances[i][1]);
           if (distances[i][1] < closestdist){
             closestdist = distances[i][1];
             closestname = distances[i][0];
+            p = i;
           }
           var marker = new google.maps.Marker({
             content: othertext.landmarks[i].properties.Details,
@@ -115,6 +112,24 @@
             infoWindow.open(map, this);
         });
     }
+
+    //render polyline
+
+    var flightPlanCoordinates = [
+          {lat: myLat, lng: myLng},
+          {lat: othertext.landmarks[p].geometry.coordinates[1], lng: othertext.landmarks[p].geometry.coordinates[0]},
+      
+        ];
+        var flightPath = new google.maps.Polyline({
+          path: flightPlanCoordinates,
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+        flightPath.setMap(map);
+
     myinfo(closestname, closestdist);
     personmarker(othertext);
     }
@@ -124,10 +139,10 @@
         if (theText.people[i].login != "WYHE4aQe"){
           var personlat = theText.people[i].lat;
           var personlng = theText.people[i].lng;
-          var distance = calculatedistance (personlat, personlng);
+          var distance = calculatedistance(personlat, personlng);
           var location = new google.maps.LatLng(personlat, personlng);
           var marker = new google.maps.Marker({
-            content: "Login: " + theText.people[i].login + "<p> Miles Away From Me: </p>" + distance,
+            content: "Login: " + theText.people[i].login + "<p> Distance: </p>" + distance + " miles",
             position: location,
             icon: "person.jpg",
             map: map,
