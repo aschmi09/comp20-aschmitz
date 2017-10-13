@@ -90,12 +90,21 @@
           var landlat = othertext.landmarks[i].geometry.coordinates[1];
           var location = new google.maps.LatLng(landlat, landlng);
           var marker = new google.maps.Marker({
+            content: othertext.landmarks[i].properties.Details,
             position: location,
             icon: "landmark.jpg",
             map: map,
-           title: othertext.landmarks[i].Location_Name,
+        });
+
+        var infoWindow = new google.maps.InfoWindow({
+        });
+
+        google.maps.event.addListener(marker, 'click', function () {
+            infoWindow.setContent(this.content)
+            infoWindow.open(map, this);
         });
     }
+   
     personmarker(othertext)
     }
 
