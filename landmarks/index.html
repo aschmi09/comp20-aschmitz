@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      
+      #map {
+        height: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+     <script>
+
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 14,
+        });
+        getMyLocation();
+
+      }
+
+      myLat = 0;
+      myLng = 0;
+
+      function getMyLocation(){
+        console.log("Hit me One");
+        if (navigator.geolocation){
+            console.log("Hit Me Two");
+            navigator.geolocation.getCurrentPosition(function(position){
+              console.log("Hit Me Three");
+              myLat = position.coords.latitude;
+              myLng = position.coords.longitude;
+              elem = document.getElementById("info");
+              elem.innerHTML = "<h1> You are in " + myLat + ", " + myLng + "</h1>";
+              setmarker();
+              sendRequest();
+            });
+              
+            console.log("Hit Me Four");
+
+        }
+
+        else {
+          alert("Geolocation not supported");
+        }
+      }
+
+      function setmarker(){
+        var myLocation = new google.maps.LatLng(myLat, myLng);
+        map.panTo(myLocation);
+
+        var marker = new google.maps.Marker({                   
+            position: myLocation,
+            icon: "me.jpg",                                           
+            map: map,
+        });
+      }
+
+      function sendRequest(){
+         var http = new XMLHttpRequest();
+         var url = "https://defense-in-derpth.herokuapp.com/sendLocation"
+         var params = "login=WYHE4aQe&lat=" + myLat.toString() + "&lng=" + myLng.toString();
+         http.open("POST", url, true);
+         http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+         http.onreadystatechange = function() {
+          if(http.readyState == 4 && http.status == 200) {
+            alert(http.responseText);
+            text = http.responseText;
+            landmarkMarker(text);
+
+          }
+        }
+         http.send(params);
+    }
+
+    function landmarkMarker(theText){
+        othertext = JSON.parse(theText);
+        console.log(othertext);
+       for (i = 0; i < othertext.landmarks.length; i++){
+          var landlng = othertext.landmarks[i].geometry.coordinates[0];
+          var landlat = othertext.landmarks[i].geometry.coordinates[1];
+          var location = new google.maps.LatLng(landlat, landlng);
+          var marker = new google.maps.Marker({
+            position: location,
+            icon: "landmark.jpg",
+            map: map,
+           title: othertext.landmarks[i].Location_Name,
+        });
+    }
+    personmarker(othertext)
+    }
+
+    function personmarker(theText){
+       for (i = 0; i < theText.people.length; i++){
+        if (theText.people[i].login != "WYHE4aQe"){
+          var personlat = theText.people[i].lat;
+          var personlng = theText.people[i].lng;
+          var location = new google.maps.LatLng(personlat, personlng);
+          var marker = new google.maps.Marker({
+            position: location,
+            icon: "person.jpg",
+            map: map,
+          });
+        }
+        else {
+          i++;
+        }
+      }
+    }
+
+
+
+
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUjFLB4pYwyvA0m3Owg6EZz_EVs7bmwDk&callback=initMap"
+    async defer></script>
+  </head>
+
+  <body>  
+    <div id="info"><h1>Trying to determine location...</h1></div>
+  </body>
+
+  <body onload = "initMap()">
+    <div id = "map"></div>
+  </body>
+
+</html>
+  
