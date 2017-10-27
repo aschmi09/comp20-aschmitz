@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Captain's Log</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        messages = {};                      
+        $(document).ready(function() {
+            for (key in localStorage){
+                $("#log").prepend(localStorage.getItem(key));
+            }
+        });
+        
+        var i = 0;
+        $(document).keypress(function(e) {
+        if(e.which == 13) {
+            var v = $("#msg").val();
+
+            var dateweird = new Date();
+
+            var year = dateweird.getFullYear();
+
+            var offset = dateweird.getTimezoneOffset() / 60;
+            var timezonenum = offset;
+            if (timezonenum < 10 && timezonenum > -10){
+                timezonenum = "0" + timezonenum;
+            }
+            timezonenum = timezonenum + ":00"
+            if (offset < 0){
+                timezonenum = timezonenum * -1;
+                timezonenum = "GMT+" + timezonenum;
+            }
+            if (offset > 0){
+                timezonenum = "GMT-" + timezonenum;
+            }
+    
+
+            var day = dateweird.getDate();
+            if (day < 10){
+                day = "0" + day;
+            }
+
+            var hr = dateweird.getHours();
+            if (hr < 10){
+                hr = "0" + hr;
+            }
+
+            var min = dateweird.getMinutes();
+            if (min < 10){
+            min = "0" + min;
+            }
+
+            var secs = dateweird.getSeconds();
+            if (secs < 10){
+            secs = "0" + secs;
+            }
+
+            var daynum = dateweird.getDay();
+            if (daynum == 0){
+                var dayword = "Sunday";
+            }
+            else if (daynum == 1){
+                var dayword = "Monday";
+            }
+            else if (daynum ==2){
+                var dayword = "Tuesday";
+            }
+            else if (daynum ==3){
+                var dayword = "Wednesday";
+            }
+            else if (daynum ==4){
+                var dayword = "Thursday";
+            }
+            else if (daynum ==5){
+                var dayword = "Friday";
+            }
+            else {
+                var dayword = "Saturday";
+            }
+
+
+            var monthnum = dateweird.getMonth();
+            
+            if(monthnum == 0){
+                var monthword = "January";
+            }
+            else if (monthnum == 1){
+                var monthword = "February";
+            }
+            else if (monthnum == 2){
+                var monthword = "March";
+            }
+            else if (monthnum == 3){
+                var monthword = "April";
+            }
+            else if (monthnum == 4){
+                var monthword = "May";
+            }
+            else if (monthnum == 5){
+                var monthword = "June";
+            }
+            else if (monthnum == 6){
+                var monthword = "July";
+            }
+            else if (monthnum == 7){
+                var monthword = "August";
+            }
+            else if (monthnum == 8){
+                var monthword = "September";
+            }
+            else if (monthnum == 9){
+                var monthword = "October";
+            }
+            else if (monthnum == 10){
+                var monthword = "November";
+            }
+            else{
+                var monthword = "December";
+            }
+
+            var display = dayword + " " + monthword + " " + day + " " + hr + ":" + min + ":" + secs + " " + year + " " + timezonenum + " " + "- " + v + "<br/>" + "<br/>";
+
+            messages[i] = display;
+            $("#log").prepend(messages[i]);
+            localStorage.setItem(Date.now(), messages[i]);
+            i++;
+        }
+        });
+
+    </script>
+</head>
+
+<body>
+    <h1>Captain's Log</h1>
+    <h3>New entry: <input type="text" id="msg" name="msg" size="30" /></h3>
+    <div id="log"></div>
+</body>
+</html>
