@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Assignment 4: Security</title>
+<!--<link rel="stylesheet" href="style.css" type="text/css" />-->
+</head>
+
+<body>
+
+<h1 id="title">Assignment 4: Security</h1>
+<h2>By Aviva Schmitz | 12.06.2017</h2>
+<h3>1. Introduction</h3>
+<p>I was instructed to find security and privacy flaws in a web server created by Sinclair Meggit. This server uses the frameworks express and node.js to handle both GET and POST requests from a web application. This web application sends the server a) the users's login, b) the user's latitute, and c) the user's longitude. The server stores these strings in a database. The server also sends back all stored checkins, along with a list of landmarks nearby. The server also sends back all data pertaining to a particular login.</p>
+<h3>2. Methodology</h3>
+<p>I found security vulnerabilities in this server by using curl, and by simply reading the code.</p>
+<h3>3. Abstract of Findings</h3>
+<p>I found three security and privacy issues in this server:<p>
+<h4>Issue 1: Cross-Site Scripting</h4>
+<p>This server accepts input from the user, namely a login, latitute and longitude. However, the server does nothing to validate this input, meaning that the user can insert Javascript code that redirects the web application to another (potentially malicious) website.<p>
+<h4>Issue 2: Mongo Injection Attack</h4>
+<p>By requesting data for all logins but the user's own login, the user is able to view data belonging to others. This is a privacy vulnerability.<p>
+<h4>Issue 3:</h4>
+<h3>4. Issues Found</h3>
+<h4>Issue 1: Cross-Site Scripting</h4>
+<h5>Issue:</h5>
+<p>This is a cross-site scripting (XSS) issue</p>
+<h5>Location Found:</h5>
+<p>Lines 46-54 in the Post/sendLocation Route</p>
+<img src="screenshot1.jpg" alt="screenshot">
+<p>This code shows the server checks that the login, latitude and longitude are not "null" before inserting them in the database, but does not check that none of the strings includes Javascript.</p>
+<h5>Severity of Issue: High</h5>
+<p>This is a very severe issue becuase this flaw enables hackers to direct users to any webpage in the world, including malicious ones that might try to steal the users' data for nefarious purposes.</p>
+<h5>Description of Issue</h5>
+<p>I found this issue using curl. Curl allowed me to send Javascript to the server, rather than a legitimate login:</p>
+<img src="screenshot2.jpg" alt="screenshot">
+<h5>Proof of Vulnerability</h5>
+<img src="screenshot3.jpg" alt="screenshot">
+<p>The screenshot above shows that the server accepted the Javascript in place of the login and put it in the database, because it responded with a legitimate JSON response, instead of "Whoops! Something is wrong with your data!"<p>
+<h5>Resolution</h5>
+<p>All user input should be stripped of javascript tags before being inserted into the database:<p>
+<img src="screenshot4.jpg" alt="screenshot">
+<h4>Issue 2: Mongo Injection Attack</h4>
+<h5>Issue:</h5>
+<p>This is an injection attack.</p>
+<h5>Location Found</h5>
+<p>This vulnerability appears in the "/checkins.json" route (lines 88-104).</p>
+<img src="screenshot5.jpg" alt="screenshot">
+<h5>Severity of Issue: Medium</h5>
+<p>Privacy is definitely extremely important and users should not have access to other users' data, but this privacy vulnerability doesn't give users access to much more data than they would have already, even if this flaw were mended. With the vulnerable "/checkins.json" route, a user can see everyone's ID, login, latitude, longitude, and date of checkin. With the default "/" route, users can all this information except the ID, and this is when this route is functioning properly. Therefore, this flaw in the "/checkins.json" route only gives users access to one more piece of data than they would otherwise have, so I designate this flaw to be of medium severity.</p>
+<h5>Description of Issue</h5>
+<p>I found this issue by reading the code and noticing that there is no code that stops a user from accessing the checkins data of other users. I managed to access data from all users but myself with a modified query string:</p>
+<img src="screenshot6.jpg" alt="screenshot">
+<h5>Proof of Vulnerability</h5>
+<p>The below screenshot shows how user with login "fred" could view all other users' data by mangling the query string:</p>
+<img src="screenshot7.jpg" alt="screenshot">
+<h5>Resolution</h5>
+<p>This security flaw could be mended by changing stripping special characters, such as "$" , from the query string:
+<h3>6. References</h3>
+<p>1. Screenshot in Section 4, Issue 1, "Resolution" comes from <a href="https://stackoverflow.com/questions/8503560/how-do-i-use-jquery-to-remove-all-script-tags-in-a-string-of-html">Stack Overflow</a>.</p>
+
+
+
+</body>
+</html>	
