@@ -20,7 +20,8 @@
 <p>This server accepts input from the user, namely a login, latitute and longitude. However, the server does nothing to validate this input, meaning that the user can insert Javascript code that redirects the web application to another (potentially malicious) website.<p>
 <h4>Issue 2: Mongo Injection Attack</h4>
 <p>By requesting data for all logins but the user's own login, the user is able to view data belonging to others. This is a privacy vulnerability.<p>
-<h4>Issue 3:</h4>
+<h4>Issue 3: Bad Programming Practice (Lack of Input Sanitization)</h4>
+<p>There are no limits to what the user can input into the Mongo Database, introducing the possiblity that the user could crash the database by inserting a lot of illegitmate data.</p>
 <h3>4. Issues Found</h3>
 <h4>Issue 1: Cross-Site Scripting</h4>
 <h5>Issue:</h5>
@@ -38,8 +39,8 @@
 <img src="screenshot3.jpg" alt="screenshot">
 <p>The screenshot above shows that the server accepted the Javascript in place of the login and put it in the database, because it responded with a legitimate JSON response, instead of "Whoops! Something is wrong with your data!"<p>
 <h5>Resolution</h5>
-<p>All user input should be stripped of javascript tags before being inserted into the database:<p>
-<img src="screenshot4.jpg" alt="screenshot">
+<p>All user input should be stripped of javascript tags before being inserted into the database with the following code: var re = /script/g;  
+var result = s.replace(re, " ");  <p>
 <h4>Issue 2: Mongo Injection Attack</h4>
 <h5>Issue:</h5>
 <p>This is an injection attack.</p>
@@ -55,11 +56,29 @@
 <p>The below screenshot shows how user with login "fred" could view all other users' data by mangling the query string:</p>
 <img src="screenshot7.jpg" alt="screenshot">
 <h5>Resolution</h5>
-<p>This security flaw could be mended by changing stripping special characters, such as "$" , from the query string:
+<p>This security flaw could be mended by sanitizing the input to get rid of special characters ($) with the following code:var re = /script/g;  
+var result = s.replace(re, " "); </p>
+<h4>Issue 3: Lack of Input Validation</h4>
+<h5>Issue:</h5>
+<p>This is an issue with programming practice.</p>
+<h5>Location Found:</h5>
+<p>This issue exists in the "post/sendLocation route," specifically where the data is inserted into the database (lines 46-57).</p>
+<img src="screenshot4.jpg" alt="screenshot">
+<h5>Severity of Issue: Low</h5>
+<p>This is not a very severe issue because it does not expose user data or expose the user to attacks. Even so, this flaw does techincally have the potential to break the application. Since there is no validation of input, a user could enter nonsense data, and this data will be inserted into the Mongo database. If enough data is inserted into the databse, it could slow down and eventually crash, thereby breaking the application. The liklihood of this scenario would be lower if the user input was validated to make sure, for example, that all latitudes and longitudes entered are actually numbers.</p>
+<h5>Description of Issue</h5>
+<p>I found this issue by reading the code. I noticed that while the application does check that the user has entered something for the login,latitude and longitude, but does not check that these inputs are valid. I proved this issue by using curl to insert strings, rather than numbers, for the latitude and longitude.</p>
+<img src="screenshot8.jpg" alt="screenshot">
+<h5>Proof of Vulnerability</h5>
+<p>The screenshot below proves that invalid data is inserted into the database and displayed on the "Checkins" page.</p>
+<img src="screenshot9.jpg" alt="screenshot">
+<h5>Resolution</h5>
+<p>This issue could be addressed by making sure that the latitudes and logitudes entered are numbers. The following code could accomplish this: if {(typeof lat != "number" || typeof lng != "number" ){
+		response.send({"error":"Whoops, something is wrong with your data!"});
+	}</p>
+<h3>5. Conclusion</h3>
+<p>This application includes cross site scripting vulnerabilities, mongo injection vulnerabilities, and data sanitization vulnerabilities. You can never ever trust user input, so I reccommend that input be sanitized in the future to ensure that it does not contain Javascript, characters associated with a mongo injection attack, or illegitimate input. The database should also be periodically purged of illegitimate data to ensure that it does not become too full to function properly. This maintainance work would be ongoing, but likely would not take too long and could prevent serious problems from ocurring down the road.</p>
 <h3>6. References</h3>
-<p>1. Screenshot in Section 4, Issue 1, "Resolution" comes from <a href="https://stackoverflow.com/questions/8503560/how-do-i-use-jquery-to-remove-all-script-tags-in-a-string-of-html">Stack Overflow</a>.</p>
-
-
-
+<p>1. Code in Section 4, Issue 1, "Resolution" and in Section 4, Issue 2, "Resolution" comes from <a href="https://docs.microsoft.com/en-us/scripting/javascript/reference/replace-method-string-javascript">Microsoft</a>. Code in Section 4, Issue 3, "Resolution" comes from <a href="https://www.mkyong.com/javascript/check-if-variable-is-a-number-in-javascript/">Mkyong.com</a>.</p>
 </body>
 </html>	
